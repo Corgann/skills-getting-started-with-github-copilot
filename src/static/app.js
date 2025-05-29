@@ -81,6 +81,54 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Adaugă activitate nouă (exemplu simplu, doar frontend)
+  const addActivityForm = document.getElementById("add-activity-form");
+  if (addActivityForm) {
+    addActivityForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const name = document.getElementById("new-activity-name").value;
+      const description = document.getElementById("new-activity-description").value;
+      const schedule = document.getElementById("new-activity-schedule").value;
+      const maxParticipants = document.getElementById("new-activity-max").value;
+
+      try {
+        const response = await fetch("/activities", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            description,
+            schedule,
+            max_participants: Number(maxParticipants)
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          messageDiv.textContent = "Activitatea a fost adăugată!";
+          messageDiv.className = "success";
+          addActivityForm.reset();
+          fetchActivities();
+        } else {
+          messageDiv.textContent = result.detail || "Eroare la adăugare.";
+          messageDiv.className = "error";
+        }
+        messageDiv.classList.remove("hidden");
+        setTimeout(() => {
+          messageDiv.classList.add("hidden");
+        }, 5000);
+      } catch (error) {
+        messageDiv.textContent = "Eroare la conectare cu serverul.";
+        messageDiv.className = "error";
+        messageDiv.classList.remove("hidden");
+        console.error("Error adding activity:", error);
+      }
+    });
+  }
+
   // Initialize app
   fetchActivities();
+  activitySelect.innerHTML = "";
 });
